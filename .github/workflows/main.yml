@@ -1,36 +1,53 @@
-# This is a basic workflow to help you get started with Actions
+name: Build RedPill DSM loader
 
-name: CI
+on: workflow_dispatch
 
-# Controls when the workflow will run
-on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  redpill:
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    name: Build RedPill lkm and load
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - uses: actions/checkout@v2.1.0
+        name: checkout src
+        id: checkout
+        with:
+          submodules: 'true'
+      - name: Build DS3615xs 6.2.4
+        id: build-ds3615xs-624
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+            bash build-ds3615xs-6.2.4.sh
+      - name: Build DS3615xs 7.0
+        id: build-ds3615xs-70
+        run: |
+            bash build-ds3615xs-7.0.sh
+      - name: Build DS918+ 6.2.4
+        id: build-ds918-624
+        run: |
+            bash build-ds918-6.2.4.sh
+      - name: Build DS918+ 7.0
+        id: build-ds918-70
+        run: |
+            bash build-ds918-7.0.sh
+      - name: Archive DS3615xs 6.2.4 loader image
+        uses: actions/upload-artifact@v2
+        with:
+          name: redpill-DS3615xs_6.2.4-loader
+          path: output/redpill-DS3615xs_6.2.4*.img
+
+      - name: Archive DS3615xs 7.0 loader image
+        uses: actions/upload-artifact@v2
+        with:
+          name: redpill-DS3615xs_7.0-loader
+          path: output/redpill-DS3615xs_7.0*.img
+
+      - name: Archive DS918+ 6.2.4 loader image
+        uses: actions/upload-artifact@v2
+        with:
+          name: redpill-DS918+_6.2.4-loader
+          path: output/redpill-DS918+_6.2.4*.img
+
+      - name: Archive DS918+ 7.0 loader image
+        uses: actions/upload-artifact@v2
+        with:
+          name: redpill-DS918+_7.0-loader
+          path: output/redpill-DS918+_7.0*.img
